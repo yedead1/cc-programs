@@ -1,0 +1,15 @@
+{
+    "computers": [
+        {
+            "id": 0,
+            "label": "MyComputer",
+            "peripherals": {
+                "right": {
+                    "height": 4,
+                    "type": "monitor",
+                    "width": 4
+                }
+            }
+        }
+    ]
+}
