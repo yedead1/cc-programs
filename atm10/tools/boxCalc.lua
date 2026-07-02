@@ -9,7 +9,11 @@ local function calcGlassFace(width, height)
         print("Face too small for glass calculation")
         return 0
     end
-    return (width * height) - ((width - 2) * (height - 2))
+    local totalCount = width * height
+    local glassCount = (width - 2) * (height - 2)
+    local borderCount = totalCount - glassCount
+    print(string.format("Calculated glass face: Total %d, Glass %d, Border %d", totalCount, glassCount, borderCount))
+    return {borderCount = borderCount, glassCount = glassCount}
 end
 
 local function addFace(width, height, solid)
@@ -21,57 +25,79 @@ local function addFace(width, height, solid)
         print("Too many faces added")
         return
     end
-    faceCount = faceCount + 1
-    if solid then
-        print("Adding solid face")
-    else
-        print("Adding hollow face")
-    end
+
     local solidCount = solid and (width * height) or 0
-    local hollowCount = not solid and 0 or calcGlassFace(width, height)
-    faces[faceCount] = {solidCount = solidCount, hollowCount = hollowCount, width = width, height = height, isSolid = solid}
-    print("Added face " .. faceCount .. ": " .. width .. "x" .. height)
+    local glassFace = not solid and calcGlassFace(width, height) or {borderCount = 0, glassCount = 0}
+    local glassCount = glassFace.glassCount
+    local borderCount = glassFace.borderCount
+    faceCount = faceCount + 1
+    faces[faceCount] = {solidFace = solidCount, glassFace = {glassCount = glassCount, borderCount = borderCount}, width = width, height = height, isSolid = solid}
+
+    if solid then
+        print(string.format("Added solid face: %dx%d, Area: %d", width, height, solidCount))
+    else
+        print(string.format("Added glass face: %dx%d, Border: %d, Glass: %d", width, height, borderCount, glassCount))
+    end
 end
 
 local function calculateTotals()
     local totalSolid = 0
-    local totalHollow = 0
+    local totalGlass = 0
     for i = 1, faceCount do
-        totalSolid = totalSolid + faces[i].solidCount
-        totalHollow = totalHollow + faces[i].hollowCount
+        totalSolid = totalSolid + faces[i].solidFace + faces[i].glassFace.borderCount   -- border blocks count as solid blocks
+        totalGlass = totalGlass + faces[i].glassFace.glassCount
     end
-    return totalSolid, totalHollow
+    return totalSolid, totalGlass
 end
 
 local function printSummary()
-    local totalSolid, totalHollow = calculateTotals()
+    local totalSolid, totalGlass = calculateTotals()
     print("Box Summary:")
     for i = 1, faceCount do
         local face = faces[i]
-        local typeStr = face.isSolid and "Solid" or "Hollow"
-        print(string.format("Face %d: %s %dx%d - Solid Blocks: %d, Hollow Blocks: %d", i, typeStr, face.width, face.height, face.solidCount, face.hollowCount))
+        local typeStr = face.isSolid and "Solid" or "Glass"
+        local faceName = (i == 1 and "Front") or (i == 2 and "Back") or (i == 3 and "Top") or (i == 4 and "Bottom") or (i == 5 and "Left") or (i == 6 and "Right")
+        if face.isSolid then
+            print(string.format("%s: %s %dx%d, Area: %d", faceName, typeStr, face.width, face.height, face.solidFace))
+        else
+            print(string.format("%s: %s %dx%d, Border: %d, Glass: %d", faceName, typeStr, face.width, face.height, face.glassFace.borderCount, face.glassFace.glassCount))
+        end
     end
-    print(string.format("Total Solid Blocks: %d", totalSolid))
-    print(string.format("Total Hollow Blocks (for glass): %d", totalHollow))
+    print(string.format("Total Solid Blocks needed: %d", totalSolid))
+    print(string.format("Total Glass Blocks needed: %d", totalGlass))
 end
 
 -- Program console interaction loop
 while true do
-    print("Enter face dimensions (width height) or 'done' to finish:")
+    print("Enter box dimensions (width height depth) or 'done' to finish:")
     local input = read()
     if input == "done" then
         printSummary()
         break
     end
-    local width, height = input:match("^(%d+)%s+(%d+)$") -- expects two numbers, example: "3 4"
+    local width, height, depth = input:match("^(%d+)[,%sxX]+(%d+)[,%sxX]+(%d+)$") -- accept space, comma, x as separators
     width = tonumber(width)
     height = tonumber(height)
-    if width and height then
-        print("Is this face solid? (y/n):")
-        local solidInput = read()
-        local isSolid = (solidInput:lower() == 'y')
-        addFace(width, height, isSolid)
+    depth = tonumber(depth)
+    if width and height and depth then
+        local faceDims = {
+            {width, height},  -- front
+            {width, height},  -- back
+            {width, depth},   -- top
+            {width, depth},   -- bottom
+            {height, depth},  -- left
+            {height, depth}   -- right
+        }
+        for i, dims in ipairs(faceDims) do
+            local w, h = dims[1], dims[2]
+            local faceName = (i == 1 and "Front") or (i == 2 and "Back") or (i == 3 and "Top") or (i == 4 and "Bottom") or (i == 5 and "Left") or (i == 6 and "Right")
+            print(string.format("Is face %s (%dx%d) solid? (y/n)", faceName, w, h))
+            local solidInput = read()
+            local isSolid = (solidInput:lower() == 'y')
+            addFace(w, h, isSolid)
+        end
+        printSummary()
     else
-        print("Invalid input, please enter two numbers.")
+        print("Invalid input, please enter three numbers.")
     end
 end

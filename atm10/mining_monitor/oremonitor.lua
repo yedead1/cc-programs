@@ -1,11 +1,18 @@
 -- Peripherals
 local monitor = peripheral.find("monitor") or error("No monitor found")
 local meBridge = peripheral.find("meBridge") or error("No ME Bridge found")
+local modem = peripheral.find("modem") or error("No modem found")
+
+-- Modem vars
+local MODEM_CHANNEL = 1000
 
 -- Display Config
 term.redirect(monitor)  -- Redirect terminal output to the monitor
 monitor.setTextScale(1)  -- Set text scale for better visibility
 local w, h = monitor.getSize()
+
+-- Self Check vars
+local selfCheckSleep = 30
 
 -- Items to track
 local items = {
@@ -14,8 +21,9 @@ local items = {
         label = "Unobtainium Dust",
         color = colors.purple,
         maxAmount = 50000,
+        overrideOreControl = false, -- Whether to override ore control for this item
         miner = {
-            operational = true,
+            operational = false,
             id = "end_miner",
             cableColor = colors.black,
         },
@@ -25,8 +33,9 @@ local items = {
         label = "Vibranium Dust",
         color = colors.green,
         maxAmount = 50000,
+        overrideOreControl = false, -- Whether to override ore control for this item
         miner = {
-            operational = true,
+            operational = false,
             id = "nether_miner_b",
             cableColor = colors.green,
         },
@@ -36,6 +45,7 @@ local items = {
         label = "Allthemodium Dust",
         color = colors.orange,
         maxAmount = 50000,
+        overrideOreControl = false, -- Whether to override ore control for this item
         miner = {
             operational = false,
             id = "overworld_miner",
@@ -47,8 +57,9 @@ local items = {
         label = "Ancient Debris",
         color = colors.brown,
         maxAmount = 100000,
+        overrideOreControl = false, -- Whether to override ore control for this item
         miner = {
-            operational = true,
+            operational = false,
             id = "nether_miner_a",
             cableColor = colors.red,
         },
@@ -57,9 +68,22 @@ local items = {
         name = "alltheores:gold_dust",
         label = "Gold Dust",
         color = colors.yellow,
-        maxAmount = 500000,
+        maxAmount = 7000000,
+        overrideOreControl = false, -- Whether to override ore control for this item
         miner = {
-            operational = true,
+            operational = false,
+            id = "nether_miner_a",
+            cableColor = colors.red,
+        },
+    },
+    {
+        name = "alltheores:gold_dust",
+        label = "Gold Dust",
+        color = colors.yellow,
+        maxAmount = 7000000,
+        overrideOreControl = false, -- Whether to override ore control for this item
+        miner = {
+            operational = false,
             id = "mining_dimension_miner",
             cableColor = colors.blue,
         },
@@ -69,19 +93,45 @@ local items = {
         label = "Iron Dust",
         color = colors.lightGray,
         maxAmount = 500000,
+        overrideOreControl = false, -- Whether to override ore control for this item
         miner = {
-            operational = true,
+            operational = false,
             id = "mining_dimension_miner",
             cableColor = colors.blue,
         },
     },
     {
-        name = "alltheores:sulfur",
-        label = "Sulfur",
+        name = "alltheores:tin_dust",
+        label = "Tin Dust",
         color = colors.yellow,
-        maxAmount = 5000,
+        maxAmount = 50000,
+        overrideOreControl = false, -- Whether to override ore control for this item
         miner = {
-            operational = true,
+            operational = false,
+            id = "mining_dimension_miner",
+            cableColor = colors.blue,
+        },
+    },
+    {
+        name = "alltheores:copper_dust",
+        label = "Copper Dust",
+        color = colors.orange,
+        maxAmount = 5000000,
+        overrideOreControl = false, -- Whether to override ore control for this item
+        miner = {
+            operational = false,
+            id = "mining_dimension_miner",
+            cableColor = colors.blue,
+        }, 
+    },
+    {
+        name = "alltheores:osmium_dust",
+        label = "Osmium Dust",
+        color = colors.lightGray,
+        maxAmount = 500000,
+        overrideOreControl = false, -- Whether to override ore control for this item
+        miner = {
+            operational = false,
             id = "mining_dimension_miner",
             cableColor = colors.blue,
         },
@@ -122,6 +172,63 @@ local function getStep(x)
         return 10000000
     else
         return 100000000
+    end
+end
+
+local function getRawOreTag(tag)
+    local rawList = {
+        ["allthemodium:allthemodium_dust"] = "allthemodium:raw_allthemodium",
+        ["allthemodium:unobtainium_dust"] = "allthemodium:raw_unobtainium",
+        ["allthemodium:vibranium_dust"] = "allthemodium:raw_vibranium",
+        ["alltheores:osmium_dust"] = "alltheores:raw_osmium",
+        ["alltheores:iron_dust"] = "minecraft:raw_iron",
+        ["alltheores:gold_dust"] = "minecraft:raw_gold",
+        ["alltheores:copper_dust"] = "minecraft:raw_copper",
+        ["alltheores:zinc_dust"] = "allthemodium:raw_zinc",
+        ["alltheores:iridium_dust"] = "alltheores:raw_iridium",
+        ["alltheores:lead_dust"] = "alltheores:raw_lead",
+        ["alltheores:nickel_dust"] = "alltheores:raw_nickel",
+        ["alltheores:uranium_dust"] = "alltheores:raw_uranium",
+        ["alltheores:tin_dust"] = "alltheores:raw_tin",
+        ["alltheores:platinum_dust"] = "alltheores:raw_platinum",
+        ["alltheores:silver_dust"] = "alltheores:raw_silver",
+        ["alltheores:aluminum_dust"] = "alltheores:raw_aluminum",
+        ["minecraft:ancient_debris"] = "minecraft:ancient_debris",
+        ["silentgear:azure_silver_dust"] = "silentgear:raw_azure_silver",
+    }
+    return rawList[tag]
+end
+
+-- Ore Control Management
+local function sendOreControlMessage(item, off)
+    local oreTag = getRawOreTag(item.name)
+    if not oreTag then return end -- No corresponding raw ore found skip sending
+    
+    local message = {
+        tag = oreTag,
+        minerId = item.miner.id,
+        off = off
+    }
+    modem.transmit(MODEM_CHANNEL, MODEM_CHANNEL, message)
+end
+
+local function setOreSignals(items)
+     -- Handle ore-specific control messages
+    for _, item in ipairs(items) do
+        local itemCount = getItemCount(item.name)
+        local isFull = (itemCount >= item.maxAmount)
+        local off = isFull or item.overrideOreControl
+        
+        -- Init cached state if not present
+        if item.lastOffState == nil then
+            item.lastOffState = not off -- Force initial send
+        end
+
+        -- Only send message if state has changed
+        if off ~= item.lastOffState then
+            sendOreControlMessage(item, off)
+            item.lastOffState = off
+        end
     end
 end
 
@@ -173,7 +280,7 @@ local function powerMiners(items)
                 break
             end
         end
-
+        
         -- Set all items in the group to the same operational status
         for _, item in ipairs(group) do
             item.miner.operational = shouldBeOperational
@@ -251,10 +358,48 @@ local function drawScreen(item, value)
     end
 end
 
+-- Self check functions
+local function bootCounter()
+    local msg = "Booting in:"
+    local count = selfCheckSleep
+    local x = #msg + 2
+    monitor.setCursorPos(1, 2)
+    monitor.write(msg)
+    while count > 0 do
+        -- clear previous count
+        local padLen = w - x + 1
+        monitor.write(string.rep(" ", padLen))
+        
+        monitor.setCursorPos(x, 2)
+        monitor.write(count .. " secs")
+        count = count -1
+        sleep(1)
+    end
+    
+    -- Show booting msg
+    monitor.setCursorPos(1, 2)
+    monitor.clearLine()
+    monitor.write("Booting up!")
+
+    -- Open modem on the specified channel
+    modem.open(MODEM_CHANNEL)
+    sleep(1)  -- Give it a moment to open
+end
+
+local function selfCheck()
+    monitor.setBackgroundColor(colors.black)
+    monitor.setCursorPos(1,1)
+    monitor.clear()
+    monitor.write("Waiting for ae2 to init!")
+    bootCounter()
+end
+
 -- Main Loop
+selfCheck()  -- Perform self-check on startup
 while true do
     powerMiners(items)  -- Update all miners' operational status based on their items
     updateBundledOutput(items, "back")  -- Update the bundled output on the back side
+    setOreSignals(items)  -- Send ore control messages based on item counts
 
     -- Display each item on the monitor
     for _, item in ipairs(items) do
