@@ -57,3 +57,7 @@ connection:on("connectionError", function(err)
 end)
 
 connection:open()
+
+while true do
+    os.pullEvent()
+end
