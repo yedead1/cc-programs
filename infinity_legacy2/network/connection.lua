@@ -76,7 +76,7 @@ function Connection.new(data)
     ---@type ITransport
     local transport = data.transport
     local options = data.options or {}
-    assert(getmetatable(transport) == ITransport, "Invalid transport provided")
+    assert(utils.instanceOf(transport, ITransport), "Invalid transport provided")
     assert(type(options) == "table", "Invalid options provided")
     options = utils.deepMerge(Connection.DEFAULT_OPTIONS, options) -- Make sure the user options match the default options structure
 

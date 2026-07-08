@@ -40,6 +40,22 @@ local function deepMerge(target, source)
     return result
 end
 
+--- Checks if an object is an instance of a given class or any of its parent classes.
+--- @param object any The object to check.
+--- @param class table The class to check against.
+--- @return boolean
+local function instanceOf(object, class)
+    local mt = getmetatable(object)
+    while mt do
+        if mt == class then
+            return true
+        end
+        mt = getmetatable(mt)
+    end
+    return false
+end
+
 return {
-    deepMerge = deepMerge
+    deepMerge = deepMerge,
+    instanceOf = instanceOf
 }
