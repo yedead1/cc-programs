@@ -30,7 +30,7 @@ Connection.__index = Connection
 
 --- Connection states
 Connection.STATE = {
-    DISCONNECTED = 0,
+    DISCONNECTED = 0, 
     CONNECTING = 1,
     CONNECTED = 2,
     DISCONNECTING = 3
