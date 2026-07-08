@@ -15,6 +15,7 @@ local ByteBuffer = require("byteBuffer")
 --------------------------------------------------
 local RedstoneTransport = setmetatable({}, { __index = ITransport })
 RedstoneTransport.__index = RedstoneTransport
+RedstoneTransport.__base = ITransport
 
 RedstoneTransport.DEFAULT_OPTIONS = {
     dataSide = "right", -- The side of the computer where the data is sent/received

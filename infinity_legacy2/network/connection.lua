@@ -36,6 +36,10 @@ Connection.STATE = {
     DISCONNECTING = 3
 }
 
+for name, value in pairs(Connection.STATE) do
+    Connection.STATE[value] = name
+end
+
 --- Default options for the connection
 Connection.DEFAULT_OPTIONS = {
     debug = {

@@ -24,6 +24,10 @@ ITransport.STATE = {
     OPEN = 1
 }
 
+for name, value in pairs(ITransport.STATE) do
+    ITransport.STATE[value] = name
+end
+
 ---------------------------------------------------
 --- Constructor
 --- @param data table A table containing the local and/or remote endpoints

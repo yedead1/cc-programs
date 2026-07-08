@@ -50,7 +50,7 @@ local function instanceOf(object, class)
         if mt == class then
             return true
         end
-        mt = getmetatable(mt)
+        mt = mt.__base
     end
     return false
 end

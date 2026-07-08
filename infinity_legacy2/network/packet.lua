@@ -38,6 +38,10 @@ Packet.TYPE = {
     DISCONNECT = 7
 }
 
+for name, value in pairs(Packet.TYPE) do
+    Packet.TYPE[value] = name
+end
+
 ---------------------------------------------------
 --- Constructor
 ---------------------------------------------------

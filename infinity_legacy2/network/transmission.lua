@@ -35,6 +35,10 @@ Transmission.STATE = {
     CANCELLED = 5
 }
 
+for name, value in pairs(Transmission.STATE) do
+    Transmission.STATE[value] = name
+end
+
 --- Failure reasons
 Transmission.FAILURE_REASON = {
     NONE = 0,
@@ -45,11 +49,19 @@ Transmission.FAILURE_REASON = {
     CANCELLED = 5
 }
 
+for name, value in pairs(Transmission.FAILURE_REASON) do
+    Transmission.FAILURE_REASON[value] = name
+end
+
 --- Transmission directions
 Transmission.DIRECTION = {
     OUTGOING = 0,
     INCOMING = 1
 }
+
+for name, value in pairs(Transmission.DIRECTION) do
+    Transmission.DIRECTION[value] = name
+end
 
 ---------------------------------------------------
 --- Arrays

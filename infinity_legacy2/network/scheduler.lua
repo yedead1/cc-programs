@@ -20,6 +20,10 @@ local TASK_STATE = {
     FAILED = 5
 }
 
+for name, value in pairs(TASK_STATE) do
+    TASK_STATE[value] = name
+end
+
 --------------------------------------------------
 -- Task Definition (private)
 --------------------------------------------------
