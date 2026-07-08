@@ -4,12 +4,12 @@
 --------------------------------------------------
 
 --- Imports
-local ITransport = require("network.transport.ITransport")
-local Transmission = require("network.transmission")
-local Packet = require("network.packet")
-local EventEmitter = require("network.eventEmitter")
-local utils = require("network.utils")
-local Scheduler = require("network.scheduler")
+local ITransport = require("transport.ITransport")
+local Transmission = require("transmission")
+local Packet = require("packet")
+local EventEmitter = require("eventEmitter")
+local utils = require("utils")
+local Scheduler = require("scheduler")
 
 --------------------------------------------------
 --- Connection Implementation

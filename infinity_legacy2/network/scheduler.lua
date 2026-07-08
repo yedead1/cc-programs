@@ -4,7 +4,7 @@
 --------------------------------------------------
 
 --- Imports
-local utils = require("network.utils")
+local utils = require("utils")
 
 --------------------------------------------------
 ---Enums

@@ -4,7 +4,7 @@
 --------------------------------------------------
 
 --- Imports
-local EventEmitter = require("network.eventEmitter")
+local EventEmitter = require("eventEmitter")
 
 --------------------------------------------------
 --- ITransport Interface

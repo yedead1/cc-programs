@@ -4,7 +4,7 @@
 --------------------------------------------------
 
 --- Imports
-local Packet = require("network.packet")
+local Packet = require("packet")
 
 --------------------------------------------------
 --- Transmission Implementation

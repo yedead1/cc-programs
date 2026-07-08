@@ -1,6 +1,8 @@
-local RedstoneTransport = require("network.transport.redstoneTransport")
-local Connection = require("network.connection")
-local Packet = require("network.packet")
+require("bootstrap")    --- Sets up the package path
+
+local RedstoneTransport = require("transport.redstoneTransport")
+local Connection = require("connection")
+local Packet = require("packet")
 
 local START_FIRST_PING = true
 

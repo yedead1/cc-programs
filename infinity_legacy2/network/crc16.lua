@@ -4,7 +4,7 @@
 --------------------------------------------------
 
 --- Imports
-local ByteBuffer = require("network.byteBuffer")
+local ByteBuffer = require("byteBuffer")
 
 --------------------------------------------------
 --- CRC16 Implementation

@@ -3,8 +3,8 @@
 --- This defines a transport layer that uses redstone signals to send and receive data.
 --------------------------------------------------
 
-local ITransport = require("network.transport.ITransport")
-local ByteBuffer = require("network.ByteBuffer")
+local ITransport = require("transport.ITransport")
+local ByteBuffer = require("byteBuffer")
 
 --------------------------------------------------
 --- RedstoneTransport
