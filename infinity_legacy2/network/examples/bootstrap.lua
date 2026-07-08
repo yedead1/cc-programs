@@ -1,9 +1,2 @@
-local root = fs.getDir(shell.getRunningProgram())
-root = fs.combine(root, "..")
-
-package.path =
-    fs.combine(root, "?.lua") .. ";" ..
-    fs.combine(root, "?/init.lua") .. ";" ..
-    package.path
-
-return root
+--- This file sets up the package path for the network module, allowing for easy importing of network-related files.
+package.path = "../?.lua;" .. package.path
