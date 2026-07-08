@@ -11,7 +11,8 @@ local connection = Connection.new({
     transport = RedstoneTransport.new({
         dataSide = "right",
         clockSide = "back",
-        clockDelay = 0.05
+        clockDelay = 0.05,
+        clock = os.clock
     }),
     autoConnect = false,
     transmission = {
