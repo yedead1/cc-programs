@@ -4,9 +4,9 @@
 --------------------------------------------------
 
 --- Imports
-local ByteBuffer = require("byteBuffer")
-local CRC16 = require("crc16")
-require("constants")
+local ByteBuffer = require("network.byteBuffer")
+local CRC16 = require("network.crc16")
+require("network.constants")
 
 --------------------------------------------------
 --- @class Packet
