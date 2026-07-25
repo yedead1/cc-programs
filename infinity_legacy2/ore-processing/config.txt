@@ -1,72 +1,79 @@
 {
     app = {
         sleepDelay = 600,
+        autoSaveConfig = false,
         defaultMin = 10000,
-        defaultMax = 15000
+        defaultMax = 15000,
+        configPath = "config.txt",
+        overridesPath = "overrides.txt",
+        modem = {
+            transmitChannel = 1,
+            receiveChannel = 2
+        }
     },
     resources = {
         aluminum = {
-            item = "aluminum_dust",
+            item = "c:dusts/aluminum",
             min = 10000,
             max = 15000
         },
         copper = {
-            item = "alltheores:copper_dust",
+            item = "c:dusts/copper",
             min = 10000,
             max = 15000
         },
         gold = {
-            item = "alltheores:gold_dust",
+            item = "c:dusts/gold",
             min = 10000,
             max = 15000
         },
         iridium = {
-            item = "alltheores:iridium_dust",
+            item = "c:dusts/iridium",
             min = 10000,
             max = 15000
         },
         iron = {
-            item = "alltheores:iron_dust",
+            item = "c:dusts/iron",
             min = 10000,
             max = 15000
         },
         lead = {
-            item = "alltheores:lead_dust",
+            item = "c:dusts/lead",
             min = 10000,
             max = 15000
         },
         nickel = {
-            item = "alltheores:nickel_dust",
+            item = "c:dusts/nickel",
             min = 10000,
             max = 15000
         },
         osmium = {
-            item = "alltheores:osmium_dust",
+            item = "c:dusts/osmium",
             min = 10000,
             max = 15000
         },
         platinum = {
-            item = "alltheores:platinum_dust",
+            item = "c:dusts/platinum",
             min = 10000,
             max = 15000
         },
         silver = {
-            item = "alltheores:silver_dust",
+            item = "c:dusts/silver",
             min = 10000,
             max = 15000
         },
         tin = {
-            item = "alltheores:tin_dust",
+            item = "c:dusts/tin",
             min = 10000,
             max = 15000
         },
         uranium = {
-            item = "alltheores:uranium_dust",
+            item = "c:dusts/uranium",
             min = 10000,
             max = 15000
         },
         zinc = {
-            item = "alltheores:zinc_dust",
+            item = "c:dusts/zinc",
             min = 10000,
             max = 15000
         }

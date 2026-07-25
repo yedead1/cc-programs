@@ -14,67 +14,67 @@ local APP_DEFAULT_CONFIG = {
     },
     resources = {
         aluminum = {
-            item = "aluminum_dust",
+            item = "c:dusts/aluminum",
             min = 10000,
             max = 15000
         },
         copper = {
-            item = "alltheores:copper_dust",
+            item = "c:dusts/copper",
             min = 10000,
             max = 15000
         },
         gold = {
-            item = "alltheores:gold_dust",
+            item = "c:dusts/gold",
             min = 10000,
             max = 15000
         },
         iridium = {
-            item = "alltheores:iridium_dust",
+            item = "c:dusts/iridium",
             min = 10000,
             max = 15000
         },
         iron = {
-            item = "alltheores:iron_dust",
+            item = "c:dusts/iron",
             min = 10000,
             max = 15000
         },
         lead = {
-            item = "alltheores:lead_dust",
+            item = "c:dusts/lead",
             min = 10000,
             max = 15000
         },
         nickel = {
-            item = "alltheores:nickel_dust",
+            item = "c:dusts/nickel",
             min = 10000,
             max = 15000
         },
         osmium = {
-            item = "alltheores:osmium_dust",
+            item = "c:dusts/osmium",
             min = 10000,
             max = 15000
         },
         platinum = {
-            item = "alltheores:platinum_dust",
+            item = "c:dusts/platinum",
             min = 10000,
             max = 15000
         },
         silver = {
-            item = "alltheores:silver_dust",
+            item = "c:dusts/silver",
             min = 10000,
             max = 15000
         },
         tin = {
-            item = "alltheores:tin_dust",
+            item = "c:dusts/tin",
             min = 10000,
             max = 15000
         },
         uranium = {
-            item = "alltheores:uranium_dust",
+            item = "c:dusts/uranium",
             min = 10000,
             max = 15000
         },
         zinc = {
-            item = "alltheores:zinc_dust",
+            item = "c:dusts/zinc",
             min = 10000,
             max = 15000
         }
@@ -92,8 +92,8 @@ local CONFIG_TYPES = {
 }
 
 --- Application global vars
-local APP_CONFIG = APP_DEFAULT_CONFIG
-local APP_OVERRIDES = APP_DEFAULT_OVERRIDES
+local APP_CONFIG = {}
+local APP_OVERRIDES = {}
 local APP_RESOURCES = {}
 
 
@@ -102,22 +102,6 @@ require("bootstrap")    -- Makes sure the environment is set up correctly to imp
 local utils = require("utils")
 
 --- Helpers
---- Loads the configuration and overrides from their respective files
---- If the files do not exist, it will create them with default values
-local function loadData()
-    APP_CONFIG = utils.loadTable(APP_DEFAULT_CONFIG.app.configPath)
-    APP_OVERRIDES = utils.loadTable(APP_DEFAULT_CONFIG.app.overridesPath)
-
-    if APP_CONFIG == nil then
-        APP_CONFIG = APP_DEFAULT_CONFIG
-        utils.saveTable(APP_DEFAULT_CONFIG.app.configPath, APP_CONFIG)
-    end
-    if APP_OVERRIDES == nil then
-        APP_OVERRIDES = APP_DEFAULT_OVERRIDES
-        utils.saveTable(APP_DEFAULT_CONFIG.app.overridesPath, APP_OVERRIDES)
-    end
-end
-
 --- Saves the configuration and overrides to their respective files
 --- @param data table The data to save
 --- @param type number The type of data to save (CONFIG_TYPES.CONFIG or CONFIG_TYPES.OVERRIDES)
@@ -129,6 +113,22 @@ local function saveData(data, type)
         utils.saveTable(APP_DEFAULT_CONFIG.app.overridesPath, data)
     else
         error("Invalid config type")
+    end
+end
+
+--- Loads the configuration and overrides from their respective files
+--- If the files do not exist, it will create them with default values
+local function loadData()
+    APP_CONFIG = utils.loadTable(APP_DEFAULT_CONFIG.app.configPath)
+    APP_OVERRIDES = utils.loadTable(APP_DEFAULT_CONFIG.app.overridesPath)
+
+    if APP_CONFIG == nil then
+        APP_CONFIG = APP_DEFAULT_CONFIG
+        utils.saveData(APP_DEFAULT_CONFIG, CONFIG_TYPES.CONFIG)
+    end
+    if APP_OVERRIDES == nil then
+        APP_OVERRIDES = APP_DEFAULT_OVERRIDES
+        utils.saveData(APP_DEFAULT_OVERRIDES, CONFIG_TYPES.OVERRIDES)
     end
 end
 
@@ -228,7 +228,7 @@ local function scanInventory(targets)
     if not targets or type(targets) ~= "table" then
         targets = {
             namespaces = {
-                "alltheores"
+                "c:dusts/"
             },
             tags = {}
         }
@@ -264,7 +264,8 @@ local function scanInventory(targets)
 
                 if not matched and type(targets.namespaces) == "table" then
                     for _, namespace in ipairs(targets.namespaces) do
-                        if tagName:match("^" .. namespace .. ":") then
+                        local pattern = "^" .. namespace .. "[^/]+$"  -- Match the namespace followed by any characters except a slash
+                        if tagName:match(pattern) then
                             inventory[tagName] = (inventory[tagName] or 0) + item.count
                             break
                         end
