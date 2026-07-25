@@ -1,2 +1,7 @@
 pastebin get f4Tm8Qcg github
+
+network code
 github yedead1 cc-programs infinity_legacy2/network
+
+ore processor
+github yedead1 cc-programs infinity_legacy2/ore-processing

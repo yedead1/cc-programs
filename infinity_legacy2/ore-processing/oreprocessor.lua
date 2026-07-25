@@ -110,11 +110,11 @@ local function loadData()
 
     if APP_CONFIG == nil then
         APP_CONFIG = APP_DEFAULT_CONFIG
-        utils.saveTable(APP_CONFIG, APP_DEFAULT_CONFIG.app.configPath)
+        utils.saveTable(APP_DEFAULT_CONFIG.app.configPath, APP_CONFIG)
     end
     if APP_OVERRIDES == nil then
         APP_OVERRIDES = APP_DEFAULT_OVERRIDES
-        utils.saveTable(APP_OVERRIDES, APP_DEFAULT_CONFIG.app.overridesPath)
+        utils.saveTable(APP_DEFAULT_CONFIG.app.overridesPath, APP_OVERRIDES)
     end
 end
 
@@ -124,9 +124,9 @@ end
 --- @error If the type is invalid
 local function saveData(data, type)
     if type == CONFIG_TYPES.CONFIG then
-        utils.saveTable(APP_CONFIG, APP_DEFAULT_CONFIG.app.configPath)
+        utils.saveTable(APP_DEFAULT_CONFIG.app.configPath, data)
     elseif type == CONFIG_TYPES.OVERRIDES then
-        utils.saveTable(APP_OVERRIDES, APP_DEFAULT_CONFIG.app.overridesPath)
+        utils.saveTable(APP_DEFAULT_CONFIG.app.overridesPath, data)
     else
         error("Invalid config type")
     end

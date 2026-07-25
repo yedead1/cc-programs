@@ -28,16 +28,16 @@ end
 
 --- Loads a table from a file, or returns an empty table if the file does not exist.
 --- @param path string The path to the file.
---- @return table table The loaded table.
+--- @return table|nil table The loaded table, or nil if the file does not exist.
 local function loadTable(path)
     if not fs.exists(path) then
-        return {}
+        return nil
     end
 
     local file = fs.open(path, "r")
     local content = file.readAll()
     file.close()
-    return textutils.unserialize(content) or {}
+    return textutils.unserialize(content) or nil
 end
 
 --- Saves a table to a file, overwriting any existing content.
