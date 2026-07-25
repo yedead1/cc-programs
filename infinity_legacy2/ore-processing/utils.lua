@@ -5,12 +5,13 @@
 --- @return table table The flattened table.
 local function flattenTable(tbl)
     local result = {}
-    local function recursiveFlatten(t)
-        for _, v in ipairs(t) do
+    local function recursiveFlatten(t, prefix)
+        for k, v in pairs(t) do
+            local key = prefix and (prefix .. "." .. tostring(k)) or tostring(k)
             if type(v) == "table" then
-                recursiveFlatten(v)
+                recursiveFlatten(v, key)
             else
-                table.insert(result, v)
+                result[key] = v
             end
         end
     end
