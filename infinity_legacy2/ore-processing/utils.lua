@@ -56,7 +56,7 @@ end
 --- @param tbl table The table to append.
 --- @return nil
 local function appendTable(path, tbl)
-    local existing = loadTable(path)
+    local existing = loadTable(path) or {}
     local changed = false
     for k, v in pairs(tbl) do
         if v ~= existing[k] then

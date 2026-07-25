@@ -547,7 +547,7 @@ end
 local function runConsole()
     while true do
         term.write("> ")
-        local input = term.read()
+        local input = read()
         if input then
             execCommand(input)
         end
