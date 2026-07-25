@@ -124,11 +124,11 @@ local function loadData()
 
     if APP_CONFIG == nil then
         APP_CONFIG = APP_DEFAULT_CONFIG
-        utils.saveData(APP_DEFAULT_CONFIG, CONFIG_TYPES.CONFIG)
+        saveData(APP_DEFAULT_CONFIG, CONFIG_TYPES.CONFIG)
     end
     if APP_OVERRIDES == nil then
         APP_OVERRIDES = APP_DEFAULT_OVERRIDES
-        utils.saveData(APP_DEFAULT_OVERRIDES, CONFIG_TYPES.OVERRIDES)
+        saveData(APP_DEFAULT_OVERRIDES, CONFIG_TYPES.OVERRIDES)
     end
 end
 
@@ -227,6 +227,7 @@ end
 local function scanInventory(targets)
     if not targets or type(targets) ~= "table" then
         targets = {
+            combinedMatch = false,
             namespaces = {
                 "c:dusts/"
             },
@@ -251,23 +252,39 @@ local function scanInventory(targets)
         if details and details.tags then
             -- Scan for matching tags or namespaces
             for tagName, _ in pairs(details.tags) do
-                local matched = false
-                if type(targets.tags) == "table" then
-                    for _, explictTag in ipairs(targets.tags) do
-                        if tagName == explictTag then
-                            inventory[tagName] = (inventory[tagName] or 0) + item.count
-                            matched = true
-                            break
+                local combinedMatch = targets.combinedMatch or false
+                if not combinedMatch then
+                    local matched = false
+                    if type(targets.tags) == "table" then
+                        for _, explictTag in ipairs(targets.tags) do
+                            if tagName == utils.trim(explictTag) then
+                                inventory[tagName] = item.count
+                                matched = true
+                                break
+                            end
                         end
                     end
-                end
 
-                if not matched and type(targets.namespaces) == "table" then
-                    for _, namespace in ipairs(targets.namespaces) do
-                        local pattern = "^" .. namespace .. "[^/]+$"  -- Match the namespace followed by any characters except a slash
-                        if tagName:match(pattern) then
-                            inventory[tagName] = (inventory[tagName] or 0) + item.count
-                            break
+                    if not matched and type(targets.namespaces) == "table" then
+                        for _, namespace in ipairs(targets.namespaces) do
+                            local pattern = "^" .. utils.trim(namespace) .. "[^/]+$"  -- Match the namespace followed by any characters except a slash
+                            if tagName:match(pattern) then
+                                inventory[tagName] = item.count
+                                break
+                            end
+                        end
+                    end
+                else
+                    -- Combined mode: match both namespace and tag, e.g., "[namespace][tag]" 
+                    -- where namespace is the prefix and tag is the suffix, e.g., "c:dusts/aluminum"
+                    if type(targets.namespaces) == "table" and type(targets.tags) == "table" then
+                        for _, namespace in ipairs(targets.namespaces) do
+                            for _, tag in ipairs(targets.tags) do
+                                local pattern = "^" .. utils.trim(namespace) .. utils.trim(tag) .. "$"
+                                if tagName:match(pattern) then
+                                    inventory[tagName] = item.count
+                                end
+                            end
                         end
                     end
                 end
@@ -327,11 +344,30 @@ local function listConfig()
         header = "Current Configuration",
         lines = {}
     }
-    local flattenedConfig = utils.flatten(APP_CONFIG)   -- flatten is the alias for utils.flattenTable, which flattens a nested table into a single-level table with dot-separated keys
+    local flattenedConfig = utils.flattenTable(APP_CONFIG)
     for key, value in pairs(flattenedConfig) do
         table.insert(configList.lines, string.format("%s: %s", key, tostring(value)))
     end
     return configList
+end
+
+--- Lists the help information for available commands, including list, save, reset, update, remove, restart, and help
+--- @return table table A table containing the formatted strings for each command and its description
+local function listHelp()
+    return{
+        header = "Help - Available Commands",
+        lines = {
+            "list <resources|config|overrides> - Lists the current state of resources, configuration, or overrides",
+            "save - Saves the current configuration and overrides to their respective files",
+            "reset - Resets the configuration and overrides to their default values and saves them to their respective files",
+            "update resource <name> <tag> <min> <max> - Updates an existing resource in the configuration",
+            "update override <name> <on|off> - Sets an override for a specific resource",
+            "update sleep <seconds> - Changes the sleep timer value in the configuration",
+            "remove <resource_name> - Removes a resource from the configuration",
+            "restart - Restarts the application",
+            "help - Displays this help message"
+        }
+    }
 end
 
 --- Lists the current override values
@@ -352,7 +388,7 @@ end
 --- @return nil
 local function save()
     saveData(APP_CONFIG, CONFIG_TYPES.CONFIG)
-    saveData(APP_OVERRIDES, CONFIG_TYPES.OVERRIDES) 
+    saveData(APP_OVERRIDES, CONFIG_TYPES.OVERRIDES)
 end
 
 --- Resets the configuration and overrides to their default values and saves them to their respective files
@@ -521,18 +557,31 @@ local function execCommand(input)
     elseif command == "remove" then
         removeResource(target)
         return
+    elseif command == "restart" then
+        shell.run(shell.getRunningProgram())
+        return
+    elseif command == "help" then
+        local helpList = listHelp()
+        utils.pagination(helpList)
+        return
     else
-        print("Unknown command. Available commands: list, save, reset, update, remove")
+        print("Unknown command. Available commands: list, save, reset, update, remove, restart, help")
     end
 end
 
 --- Main Application Loop
 --- Main loop that continuously scans the inventory, calculates resource states, broadcasts the state, and optionally saves configuration and overrides
 local function main()
+    initialize()
     while true do
+        term.clear()
+        term.setCursorPos(1, 1)
+
         local inventory = scanInventory(nil)    -- Use default targets if none are provided
         calcResources(inventory)
         broadcastState(APP_RESOURCES)
+        print("Broadcasted current resource states.")
+        print(textutils.serialize(APP_RESOURCES))
 
         --- Auto-save configuration and overrides if enabled
         if APP_CONFIG.app.autoSaveConfig then
@@ -555,5 +604,4 @@ local function runConsole()
     end
 end
 
-initialize()
 parallel.waitForAny(main, runConsole)

@@ -19,6 +19,13 @@ local function flattenTable(tbl)
     return result
 end
 
+--- Trims whitespace from the beginning and end of a string.
+--- @param s string The string to trim.
+--- @return string string The trimmed string.
+local function trim(s)
+    return s:match("^%s*(.-)%s*$")
+end
+
 --- Parses a value into a boolean. Accepts "true", "1", or "on" (case-insensitive) as true; everything else is false.
 --- @param value any The value to parse.
 --- @return boolean boolean The parsed boolean value.
@@ -198,7 +205,7 @@ end
 
 return {
     flattenTable = flattenTable,
-    flattern = flattenTable,  -- Alias for flattenTable
+    trim = trim,
     parseBool = parseBool,
     loadTable = loadTable,
     saveTable = saveTable,
